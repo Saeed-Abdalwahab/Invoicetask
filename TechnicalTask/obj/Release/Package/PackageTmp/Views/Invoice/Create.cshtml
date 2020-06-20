@@ -1,0 +1,439 @@
+﻿@model TechnicalTask.ViewModels.CreatInvoiceVM
+
+@{
+    ViewBag.Title = "Creat Invoice";
+}
+<style>
+   .form-control:disabled, .form-control[readonly] {
+        background-color: #ffffff !important;
+        opacity: 1;
+    }
+   
+    .NoBackground {
+        background: none;
+        border: none;
+    }
+    .InputNotValid{
+        border:1px solid red;
+    }
+        .InputNotValid:focus {
+            border-color: #FF0000;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+        }
+</style>
+
+@using (Html.BeginForm("","",FormMethod.Post,new { id="InvoiceForm"}))
+{
+    @Html.HiddenFor(x=>x.InvoiceVM.ID)
+<div class="form-horizontal">
+    <div class="form-group row">
+        @Html.LabelFor(model => model.InvoiceVM.invoice_No, htmlAttributes: new { @class = "control-label col-md-1" })
+        <div class="col-md-5 col-sm-10">
+            @Html.EditorFor(model => model.InvoiceVM.invoice_No, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_No, "", new { @class = "text-danger" })
+        </div>
+        @Html.LabelFor(model => model.InvoiceVM.Date, htmlAttributes: new { @class = "control-label col-md-1" })
+        <div class="col-md-5 col-sm-10">
+            @Html.EditorFor(model => model.InvoiceVM.Date, new { htmlAttributes = new { @class = "form-control", type = "date" } })
+            @Html.ValidationMessageFor(model => model.InvoiceVM.Date, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.LabelFor(model => model.InvoiceVM.storeId, htmlAttributes: new { @class = "control-label col-md-1" })
+        <div class="col-md-5 col-sm-10">
+            @Html.DropDownListFor(model => model.InvoiceVM.storeId, ViewBag.Stores as SelectList, "Select Store", new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.InvoiceVM.storeId, "", new { @class = "text-danger" })
+        </div>
+        @Html.LabelFor(model => model.InvoiceVM.invoice_Total, htmlAttributes: new { @class = "control-label col-md-1" })
+        <div class="col-md-5 col-sm-10">
+            @Html.EditorFor(model => model.InvoiceVM.invoice_Total, new { htmlAttributes = new { @class = "form-control", readOnly = "readOnly", form = "InvoiceForm" } })
+            @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_Total, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    
+    <div class="form-group row">
+        @Html.LabelFor(model => model.InvoiceVM.invoice_Taxes, htmlAttributes: new { @class = "control-label col-md-1" })
+        <div class="col-md-5 col-sm-10">
+            @Html.EditorFor(model => model.InvoiceVM.invoice_Taxes, new { htmlAttributes = new { @class = "form-control", form = "InvoiceForm" } })
+            @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_Taxes, "", new { @class = "text-danger" })
+        </div>
+        @Html.LabelFor(model => model.InvoiceVM.invoice_Net, htmlAttributes: new { @class = "control-label col-md-1" })
+        <div class="col-md-5 col-sm-10">
+            @Html.EditorFor(model => model.InvoiceVM.invoice_Net, new { htmlAttributes = new { @class = "form-control", readOnly = "readOnly", form = "InvoiceForm" } })
+            @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_Net, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+</div>
+}
+
+
+<div class="row">
+    <div class="col-12 col-sm-12">
+        <div class="card mb-2">
+            <h3 class="card-header text-center font-weight-bold  py-4">Invoice Items</h3>
+            <div class="card-body">
+                <div>
+                    <span class="table-add float-right mb-3 mr-2">
+                        <button id="AddNewItem" onclick="ToggleMagicRow()" class="btn  text-success NoBackground"> <i class="fa fa-plus fa-3x"></i> </button>
+                    </span>
+                </div>
+                <table class="table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="width:7%" scope="col">#</th>
+                            <th style="width:10%" scope="col">Item</th>
+                            <th style="width:10%" scope="col">Unit</th>
+                            <th style="width:9%" scope="col">Price</th>
+                            <th style="width:9%" scope="col">Quntity</th>
+                            <th style="width:9%" scope="col">Total</th>
+                            <th style="width:9%" scope="col">Discount</th>
+                            <th style="width:9%" scope="col">Net</th>
+                            <th style="width:8%" scope="col"></th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-horizontal">
+
+    <div class="form-group">
+            <div class="col-md-offset-2 col-md-10 ">
+                <input type="submit" form="InvoiceForm" id="Submitbtn" value="Save" class="btn btn-primary" />
+            </div>
+        </div>
+</div>
+
+@section Scripts{
+    <script>
+
+        var ItemsList = [];
+            var MagicRow = `
+    <tr id="MagicRow">
+            <td>
+                        </td>
+                        <td>@Html.DropDownList("itemID", ViewBag.Items as SelectList, "Select Item", new { @class = "form-control", form = "AddNewItemForm" })</td>
+                        <td>@Html.DropDownList("UnitID", ViewBag.Units as SelectList, "Select Item", new { @class = "form-control" })</td>
+                        <td>
+                            <input class="form-control" type="text" placeholder="Price" id="ItemPrice" name="ItemPrice" />
+
+                        </td>
+                        <td>
+                            <input class="form-control" type="text"  placeholder="Quantity"  id="ItemQuantity" />
+                        </td>
+                        <td>
+
+                            <input class="form-control" id="ItemTotal" readonly />
+                        </td>
+
+                        <td>
+                            <input class="form-control"  placeholder="Discount" id="ItemDiscount" />
+                        </td>
+                        <td>
+                            <input class="form-control" id="ItemNet"  readonly />
+                        </td>
+    <td>
+     <button class="d-inline-block NoBackground" id="ConfirmAddNewItem"><i class="fa fa-check"></i></button>
+                            <button class="d-inline-block NoBackground" id="ConfirmCancelNewItem"><i class="fa fa-times"></i></button>
+
+                        </td>
+                    </tr>
+    `;
+        //CheckValidation Befor AddNew InvoiceDetails
+        function CheckAddNewItemValidation() {
+
+            $(".InputNotValid").removeClass("InputNotValid");
+            var Flag = true;
+            var inputItemID = $("#itemID");
+            var inputUnitID = $("#UnitID");
+            var inputItemPrice = $('#ItemPrice');
+            var inputItemQuantity = $('#ItemQuantity');
+            var inputItemDiscount = $('#ItemDiscount');
+
+            if (inputItemID.val() == "") {
+                inputItemID.addClass("InputNotValid");
+                inputItemID.focus();
+                Flag = false;
+
+            }
+             if (inputUnitID.val() == "") {
+                inputUnitID.addClass("InputNotValid");
+                 inputUnitID.focus();
+                 Flag = false;
+
+            }
+            if (inputItemPrice.val() < 0 || inputItemPrice.val()=="") {
+                inputItemPrice.addClass("InputNotValid");
+                 inputItemPrice.focus();
+                 Flag = false;
+
+            }
+            if (inputItemQuantity.val() < 0 || inputItemQuantity.val()=="") {
+                inputItemQuantity.addClass("InputNotValid");
+                 inputItemQuantity.focus();
+                 Flag = false;
+            }
+            if (inputItemDiscount.val() < 0 && inputItemDiscount.val()!="") {
+                inputItemQuantity.addClass("InputNotValid");
+                 inputItemQuantity.focus();
+                 Flag = false;
+            }
+            return Flag;
+        }
+        //Calculate Total  And Net
+        function Calculate_NEt_Total() {
+
+            let itemprice = $("#ItemPrice").val();
+
+            let ItemQuantity = $("#ItemQuantity").val();
+
+            let Total = parseFloat(itemprice * ItemQuantity);
+
+            let RealDiscount = parseFloat($("#ItemDiscount").val()) > 0 ? ($("#ItemDiscount").val() / 100) * Total : 0;
+            let Net = parseFloat(Total - RealDiscount);
+
+            if (Total>0){
+                $("#ItemTotal").val(Total)
+            }
+            else {
+                $("#ItemTotal").val(0)
+            }
+
+            if (Net > 0) {
+                $("#ItemNet").val(Net)
+            }
+            else {
+                $("#ItemNet").val(0)
+
+            }
+        }
+        // Add And Remove MagicRow
+        function ToggleMagicRow() {
+            if ($("#MagicRow").length || $("#MagicRowEdit").length) {
+                return false;
+            }
+            $("thead").append(MagicRow);
+        }
+        //Fill New Item To Our Invoice Details List
+
+            function PushNewitem() {
+                if (CheckAddNewItemValidation()) {
+                    var LastRow = $("tbody").children().length + 1;
+                    let RowID = ItemsList.length + 1;
+                    var InvoiceDetails = {
+                        ID:0,
+                        RowID: RowID,
+                        ItemID: parseInt($("#itemID").val()),
+                        UnitID: parseInt($("#UnitID").val()),
+                        Price: parseFloat($("#ItemPrice").val()),
+                        Quantity: parseFloat($("#ItemQuantity").val()),
+                        Total: parseFloat($("#ItemTotal").val()),
+                        Discount: parseFloat($("#ItemDiscount").val()) > 0 ? parseFloat($("#ItemDiscount").val()) : 0,
+                        Net: parseFloat($("#ItemNet").val())
+                    }
+                    ItemsList.push(InvoiceDetails);
+                    var itemName = $("#itemID option:selected").text();
+                    var UnitName = $("#UnitID option:selected").text();
+                    AddNewRow(RowID, LastRow, itemName, UnitName, InvoiceDetails.Price, InvoiceDetails.Quantity, InvoiceDetails.Discount);
+                    $("#MagicRow").remove();
+
+                    UpdateTotalNet();
+                    toastr.success( "New Item Added Sucessfully", "Notification", { timeOut: 3000 });
+
+                }
+                else {
+                    toastr.error("Please Make Shur Yo Fill All Required Fildes!", "Notification", { timeOut: 3000 });
+
+                }
+        }
+        //Function To calculate The Update Total Net And Update It Row
+        function UpdateTotalNet(listofitemisintable) {
+            var TotalNet = 0;
+            $.each(ItemsList, function (index, item) {
+                TotalNet += item.Net;
+            });
+            $("#InvoiceVM_invoice_Total").val(TotalNet);
+            var TaxValue = ($("#InvoiceVM_invoice_Taxes").val() / 100) * TotalNet;
+            let RealTaxValue = TaxValue > 0 ? TaxValue : 0;
+            $("#InvoiceVM_invoice_Net").val(TotalNet + RealTaxValue);
+        }
+        //Add New Row
+        function AddNewRow(RowID,index, itemname, unitname, itemprice, itemquantity, itemdiscount) {
+            var Total = itemquantity * itemprice;
+            var Net = Total - (itemdiscount / 100) * Total;
+                        var NewRow = ` <tr id="RowNo_${index}">
+            <td >${index}</td>
+                        <td name="item">`+itemname+`</td>
+                        <td name="unit">`+unitname+`</td>
+                        <td name="price">`+ itemprice+`</td>
+                        <td name="Quantity">`+ itemquantity+`</td>
+                        <td name="Total">`+ Total+`</td>
+                        <td name="Discount">`+ itemdiscount+`</td>
+                        <td name="Net">`+ Net +`</td>  <td>
+     <button class="btn d-inline-block text-danger  NoBackground" onClick="DeletRow(${RowID},${index})"><i class="fa fa-trash"></i></button>
+                            <button class="btn d-inline-block  text-primary NoBackground" onClick="EditRow(${RowID},${index})"><i class="fa fa-edit"></i></i></button>
+                        </td>
+                    </tr>`;
+            $("tbody").append(NewRow);
+
+        }
+        //Delete Row
+        function DeletRow(_RowID, RowIndex) {
+            $("#RowNo_" + RowIndex).remove();
+            ItemsList = ItemsList.filter(x => x.RowID != _RowID);
+            $("#MagicRow").remove();
+            $("#MagicRowEdit").remove();
+            ResetTableIndex();
+            Calculate_NEt_Total();
+            UpdateTotalNet();
+
+
+        }
+        //To Enable Edit In Selected Row
+        function EditRow(_RowID, index) {
+            if ($("#MagicRow").length || $("#MagicRowEdit").length) {
+                return false;
+            }
+
+            var EditedInvoiceDetails = ItemsList.filter(x => x.RowID == _RowID)[0];
+             var MagicRowEdit = `
+    <tr id="MagicRowEdit">
+            <td>
+
+                        </td>
+                        <td>@Html.DropDownList("itemID", ViewBag.Items as SelectList, "Select Item", new { @class = "form-control" })</td>
+                        <td>@Html.DropDownList("UnitID", ViewBag.Units as SelectList, "Select Unit", new { @class = "form-control" })</td>
+                        <td>
+                            <input class="form-control" type="text" placeholder="Price"  value="${EditedInvoiceDetails.Price}" id="ItemPrice" name="ItemPrice" />
+
+                        </td>
+                        <td>
+                            <input class="form-control" type="text"  value="${EditedInvoiceDetails.Quantity}" placeholder="Quantity"  id="ItemQuantity" />
+                        </td>
+                        <td>
+
+                            <input class="form-control" value="${EditedInvoiceDetails.Total}" id="ItemTotal" readonly />
+                        </td>
+
+                        <td>
+                            <input class="form-control"  value="${EditedInvoiceDetails.Discount}" placeholder="Discount" id="ItemDiscount" />
+                        </td>
+                        <td>
+                            <input class="form-control" id="ItemNet"  value="${EditedInvoiceDetails.Net}" readonly />
+                        </td>
+    <td>
+                            <button class="d-inline-block NoBackground" onClick="EditIteminvoiceDetails(${_RowID},${index})"><i class="fa fa-check"></i></button>
+                            <button class="d-inline-block NoBackground" id="ConfirmCancelNewItem"><i class="fa fa-times"></i></button>
+
+                        </td>
+                    </tr>
+    `;
+            $("thead").append(MagicRowEdit);
+            $("#itemID").val(EditedInvoiceDetails.ItemID);
+            $("#UnitID").val(EditedInvoiceDetails.UnitID);
+
+        }
+        //Functon To Submitt Edit In Row
+        function EditIteminvoiceDetails(RowID, RowIndex) {
+            if (CheckAddNewItemValidation()) {
+                PushNewitem();
+                DeletRow(RowID, RowIndex);
+                ResetTableIndex();
+                UpdateTotalNet();
+
+            }
+            else {
+                toastr.error("Please Make Shur Yo Fill All Required Fildes!", "Notification", { timeOut: 3000 });
+            }
+
+        }
+        // Handel Order OF Rows When Delete Row
+        function ResetTableIndex() {
+
+            var AllFristTD = $("tbody").find('tr > td:first-child');
+            $.each(AllFristTD, function (index, item) {
+                item.innerHTML = index + 1;
+            });
+        }
+        $(document).ready(function () {
+            $(document).on('click', '#ConfirmCancelNewItem', function () {
+                $("#MagicRow").remove();
+                $("#MagicRowEdit").remove();
+            });
+            $(document).on('keyup', '#ItemPrice', function () {
+                Calculate_NEt_Total();
+                $(this).removeClass("InputNotValid");
+
+            });
+            $(document).on('keyup', '#ItemQuantity', function () {
+                Calculate_NEt_Total();
+                $(this).removeClass("InputNotValid");
+
+            });
+            $(document).on('keyup', '#ItemDiscount', function () {
+                Calculate_NEt_Total();
+                $(this).removeClass("InputNotValid");
+
+            });
+            $(document).on('change', '#itemID', function () {
+                $(this).removeClass("InputNotValid");
+
+            });
+            $(document).on('change', '#UnitID', function () {
+                $(this).removeClass("InputNotValid");
+            });
+            $(document).on('keyup', '#InvoiceVM_invoice_Taxes', function () {
+                UpdateTotalNet();
+
+            });
+            $(document).on('click', '#ConfirmAddNewItem', function () {
+                PushNewitem();
+                ResetTableIndex();
+            });
+            $("#Submitbtn").click(function (e) {
+                e.preventDefault();
+                if ($("#InvoiceForm").valid()) {
+                    if (ItemsList.length > 0) {
+                        let list = { 'InvoiceDetailsVMs': ItemsList }
+
+                        var datatosent = $("#InvoiceForm").serialize() + "&" + $.param(list);
+
+                        $.ajax({
+                            url: "@Url.Action("Create", "Invoice")",
+                            type: "post",
+                            data: datatosent,
+                            success: function (Data) {
+                                if (Data.Status == true) {
+
+                                    toastr.success("INvoice Added Successfully", "Notification", { timeOut: 1000 });
+                                    window.location.href = '@Url.Action("index", "Invoice")';
+                                }
+                                else {
+                                    toastr.error("Invoice Not Saved Try Again", "Notification", { timeOut: 1000 });
+                                }
+
+                            },
+                            error: function () {
+                                toastr.error("Somthing Goes Wrong!", "Notification", { timeOut: 1000 });
+
+                            }
+                        });
+                    }
+                    else {
+                        toastr.error("Please Add At least One Item To invoice!", "Notification", { timeOut: 1000 });
+                        return false;
+
+                    }
+                }
+                else {
+                    return false;
+                }
+            });
+        })
+    </script>
+    }

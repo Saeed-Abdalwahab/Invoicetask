@@ -1,0 +1,133 @@
+﻿@model TechnicalTask.ViewModels.CreatInvoiceVM
+
+@{
+    ViewBag.Title = "Edit Invoice";
+    int counter = 0;
+}
+<style>
+    .form-control:disabled, .form-control[readonly] {
+        background-color: #ffffff !important;
+        opacity: 1;
+    }
+
+    .NoBackground {
+        background: none;
+        border: none;
+    }
+
+    .InputNotValid {
+        border: 1px solid red;
+    }
+
+        .InputNotValid:focus {
+            border-color: #FF0000;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+        }
+</style>
+
+@using (Html.BeginForm("", "", FormMethod.Post, new { id = "InvoiceForm" }))
+{
+    @Html.HiddenFor(x => x.InvoiceVM.ID)
+    <div class="form-horizontal">
+        <div class="form-group row">
+            @Html.LabelFor(model => model.InvoiceVM.invoice_No, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-5 col-sm-10">
+                @Html.EditorFor(model => model.InvoiceVM.invoice_No, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_No, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.InvoiceVM.Date, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-5 col-sm-10">
+                @Html.EditorFor(model => model.InvoiceVM.Date, new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                @Html.ValidationMessageFor(model => model.InvoiceVM.Date, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group row">
+            @Html.LabelFor(model => model.InvoiceVM.storeId, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-5 col-sm-10">
+                @Html.DropDownListFor(model => model.InvoiceVM.storeId, ViewBag.Stores as SelectList, "Select Store", new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.InvoiceVM.storeId, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.InvoiceVM.invoice_Total, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-5 col-sm-10">
+                @Html.EditorFor(model => model.InvoiceVM.invoice_Total, new { htmlAttributes = new { @class = "form-control", readOnly = "readOnly", form = "InvoiceForm" } })
+                @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_Total, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.LabelFor(model => model.InvoiceVM.invoice_Taxes, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-5 col-sm-10">
+                @Html.EditorFor(model => model.InvoiceVM.invoice_Taxes, new { htmlAttributes = new { @class = "form-control", form = "InvoiceForm" } })
+                @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_Taxes, "", new { @class = "text-danger" })
+            </div>
+            @Html.LabelFor(model => model.InvoiceVM.invoice_Net, htmlAttributes: new { @class = "control-label col-md-1" })
+            <div class="col-md-5 col-sm-10">
+                @Html.EditorFor(model => model.InvoiceVM.invoice_Net, new { htmlAttributes = new { @class = "form-control", readOnly = "readOnly", form = "InvoiceForm" } })
+                @Html.ValidationMessageFor(model => model.InvoiceVM.invoice_Net, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+    </div>
+}
+
+
+<div class="row">
+    <div class="col-12 col-sm-12">
+        <div class="card mb-2">
+            <h3 class="card-header text-center font-weight-bold  py-4">Invoice Items</h3>
+            <div class="card-body">
+                
+                <table class="table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th style="width:7%" scope="col">#</th>
+                            <th style="width:10%" scope="col">Item</th>
+                            <th style="width:10%" scope="col">Unit</th>
+                            <th style="width:9%" scope="col">Price</th>
+                            <th style="width:9%" scope="col">Quntity</th>
+                            <th style="width:9%" scope="col">Total</th>
+                            <th style="width:9%" scope="col">Discount</th>
+                            <th style="width:9%" scope="col">Net</th>
+                            <th style="width:8%" scope="col"></th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.InvoiceDetailsVMs)
+                        {
+                            counter++;
+                            <tr>
+                                <th>@counter</th>
+                                <th>@item.ItemName</th>
+                                <th>@item.UnitName</th>
+                                <th>@item.Price</th>
+                                <th>@item.Quantity</th>
+                                <th>@item.Total</th>
+                                <th>@item.Discount</th>
+                                <th>@item.Net</th>
+                                <th></th>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-horizontal">
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10 ">
+            <a class="btn" href="@Url.Action("Index","Invoice")"> Back</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+   <script>
+       $(document).ready(function () {
+           $("input").attr("readOnly", "readOnly");
+           $("Select").attr("Disabled", "Disabled");
+       })
+    </script>
+}
